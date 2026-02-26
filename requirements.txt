@@ -1,0 +1,12 @@
+streamlit>=1.32.0
+plotly>=5.18.0
+pandas>=2.0.0
+numpy>=1.24.0
+
+# ── Producción (descomentar cuando se integren los módulos reales) ──
+# yfinance>=0.2.36          # Componente 1: Yahoo Finance API
+# vectorbt>=0.26.1          # Componente 3: Backtesting
+# scikit-learn>=1.4.0       # Modelo 2.1.1: SVC
+# tensorflow>=2.15.0        # Modelos 2.1.2-2.1.5: RNN, LSTM, BiLSTM, GRU
+# statsmodels>=0.14.0       # Modelo 2.2.1: ARIMA
+# ib_insync>=0.9.86         # Componente 4: Interactive Brokers API

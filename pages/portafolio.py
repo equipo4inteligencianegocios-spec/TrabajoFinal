@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 from utils.data import EMPRESAS, TODOS_MODELOS, C, theme
-from utils.data import get_ohlcv, get_all_predictions, consenso
+from utils.data import get_ohlcv, get_all_predictions, consenso, _enviar_orden_ib
 
 # Portafolio de ejemplo (reemplazar con datos reales IB)
 PORTAFOLIO_BASE = {
@@ -176,29 +176,74 @@ def show():
     # ════════════════════════════════════
     with tabs[2]:
         st.subheader("📤 Envío de Órdenes · Interactive Brokers API")
-        st.warning("⚠ Modo demostración. En producción: usar `ib_insync` para órdenes reales.")
 
-        col_form, col_prev = st.columns([1,1])
+    # ── Estado de conexión ────────────────────────────────────────
+    col_status = st.columns(3)
+    
+    # Intentar conexión real
+    ib_conectado = False
+    try:
+        from ib_insync import IB
+        ib_test = IB()
+        ib_test.connect("127.0.0.1", 7497, clientId=1, timeout=3)
+        ib_conectado = ib_test.isConnected()
+        ib_test.disconnect()
+    except:
+        ib_conectado = False
 
-        with col_form:
-            st.markdown("**Nueva orden**")
-            ord_tick   = st.selectbox("Ticker", list(EMPRESAS.keys()))
-            ord_accion = st.selectbox("Tipo de orden", ["COMPRA (BUY)", "VENTA (SELL)", "SHORT SELL"])
-            ord_tipo   = st.selectbox("Tipo de ejecución", ["MARKET","LIMIT","STOP LIMIT"])
-            ord_cant   = st.number_input("Cantidad de acciones", min_value=1, value=100)
+    if ib_conectado:
+        st.success("✅ Interactive Brokers TWS conectado · Modo PRODUCCIÓN")
+    else:
+        st.warning("⚠ TWS no detectado · Ejecutando en modo SIMULACIÓN · "
+                   "Abre TWS o IB Gateway para activar órdenes reales.")
 
-            df_ord = get_ohlcv(ord_tick, 2)
-            p_ref  = df_ord["Close"].iloc[-1]
+    col_form, col_prev = st.columns([1, 1])
 
-            ord_precio = st.number_input("Precio límite (USD)", value=round(p_ref, 4),
-                                         disabled=(ord_tipo=="MARKET"), format="%.4f")
-            ord_sl     = st.number_input("Stop-Loss (USD)", value=round(p_ref*0.95, 4), format="%.4f")
-            ord_tp     = st.number_input("Take-Profit (USD)", value=round(p_ref*1.07, 4), format="%.4f")
+    with col_form:
+        st.markdown("**Nueva orden**")
+        ord_tick   = st.selectbox("Ticker", list(EMPRESAS.keys()))
+        ord_accion = st.selectbox("Tipo de orden",
+                                  ["COMPRA (BUY)", "VENTA (SELL)", "SHORT SELL"])
+        ord_tipo   = st.selectbox("Tipo de ejecución",
+                                  ["MARKET", "LIMIT", "STOP LIMIT"])
+        ord_cant   = st.number_input("Cantidad de acciones", min_value=1, value=100)
 
-            enviar = st.button("📤 Enviar orden al broker", use_container_width=True)
-            if enviar:
-                st.success(f"✅ Orden simulada enviada: **{ord_accion}** {ord_cant} acciones "
-                           f"de **{ord_tick}** a ${ord_precio:.4f} · SL: ${ord_sl:.4f} · TP: ${ord_tp:.4f}")
+        df_ord = get_ohlcv(ord_tick, 2)
+        p_ref  = df_ord["Close"].iloc[-1]
+
+        ord_precio = st.number_input("Precio límite (USD)",
+                                     value=round(p_ref, 4),
+                                     disabled=(ord_tipo == "MARKET"),
+                                     format="%.4f")
+        ord_sl = st.number_input("Stop-Loss (USD)",
+                                  value=round(p_ref * 0.95, 4), format="%.4f")
+        ord_tp = st.number_input("Take-Profit (USD)",
+                                  value=round(p_ref * 1.07, 4), format="%.4f")
+
+        enviar = st.button("📤 Enviar orden al broker", use_container_width=True)
+
+        if enviar:
+            if ib_conectado:
+                # ── PRODUCCIÓN: orden real ─────────────────────────
+                resultado = _enviar_orden_ib(
+                    ticker     = ord_tick,
+                    accion     = "BUY" if "COMPRA" in ord_accion else "SELL",
+                    cantidad   = ord_cant,
+                    tipo       = ord_tipo,
+                    precio_lim = ord_precio if ord_tipo != "MARKET" else None,
+                )
+                if resultado["ok"]:
+                    st.success(f"✅ Orden ejecutada · ID: {resultado['order_id']} · "
+                               f"{ord_accion} {ord_cant} {ord_tick} "
+                               f"a ${resultado['precio_ejecutado']:.4f}")
+                else:
+                    st.error(f"❌ Error al enviar orden: {resultado['error']}")
+            else:
+                # ── SIMULACIÓN ─────────────────────────────────────
+                st.success(f"✅ Orden simulada: **{ord_accion}** {ord_cant} "
+                           f"acciones de **{ord_tick}** a ${p_ref:.4f} · "
+                           f"SL: ${ord_sl:.4f} · TP: ${ord_tp:.4f}")
+                st.info("ℹ Conecta TWS para enviar órdenes reales.")
 
         with col_prev:
             st.markdown("**Vista previa de la orden**")

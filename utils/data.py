@@ -553,3 +553,66 @@ def get_backtest_metrics(ticker: str, model_id: str) -> dict:
         "total_trades": int(pf.trades.count()),
         "calmar":       float(pf.calmar_ratio()),
     }
+
+def _enviar_orden_ib(ticker: str, accion: str, cantidad: int,
+                     tipo: str = "MARKET", precio_lim: float = None) -> dict:
+    """
+    Envía una orden real a Interactive Brokers via ib_insync.
+    Requiere TWS o IB Gateway corriendo en localhost:7497.
+
+    Parámetros:
+        ticker     : símbolo (ej: "FSM", "SCCO")
+        accion     : "BUY" o "SELL"
+        cantidad   : número de acciones
+        tipo       : "MARKET" | "LIMIT" | "STOP LIMIT"
+        precio_lim : precio límite (solo para LIMIT y STOP LIMIT)
+    """
+    try:
+        from ib_insync import IB, Stock, MarketOrder, LimitOrder, Order
+
+        ib = IB()
+        ib.connect("127.0.0.1", 7497, clientId=10, timeout=10)
+
+        if not ib.isConnected():
+            return {"ok": False, "error": "No se pudo conectar a TWS"}
+
+        # ── Definir el contrato ───────────────────────────────────
+        # VOLCABC1 cotiza en Lima, el resto en NYSE/SMART
+        if ticker == "VOLCABC1":
+            contrato = Stock("VOLCABC1", "LSEX", "PEN")
+        else:
+            contrato = Stock(ticker, "SMART", "USD")
+
+        # Calificar el contrato (obtener detalles completos de IB)
+        ib.qualifyContracts(contrato)
+
+        # ── Definir la orden ──────────────────────────────────────
+        if tipo == "MARKET":
+            orden = MarketOrder(accion, cantidad)
+        elif tipo == "LIMIT":
+            orden = LimitOrder(accion, cantidad, precio_lim)
+        elif tipo == "STOP LIMIT":
+            orden = Order()
+            orden.action       = accion
+            orden.totalQuantity = cantidad
+            orden.orderType    = "STP LMT"
+            orden.lmtPrice     = precio_lim
+            orden.auxPrice     = precio_lim  # stop price
+
+        # ── Enviar la orden ───────────────────────────────────────
+        trade = ib.placeOrder(contrato, orden)
+        ib.sleep(1)  # esperar confirmación
+
+        precio_ejecutado = trade.orderStatus.avgFillPrice or precio_lim or 0.0
+
+        ib.disconnect()
+
+        return {
+            "ok":                True,
+            "order_id":          trade.order.orderId,
+            "status":            trade.orderStatus.status,
+            "precio_ejecutado":  precio_ejecutado,
+        }
+
+    except Exception as e:
+        return {"ok": False, "error": str(e)}

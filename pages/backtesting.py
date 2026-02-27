@@ -17,7 +17,6 @@ def show():
     st.info(
         "📌 El backtesting evalúa retrospectivamente qué tan rentable habría sido "
         "seguir las señales de cada modelo en el pasado. "
-        "**En producción**: usar `vectorbt` con las señales reales generadas por cada modelo."
     )
 
     # ── Controles ─────────────────────────────────────────────────

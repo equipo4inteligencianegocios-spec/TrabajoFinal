@@ -14,29 +14,37 @@ from datetime import datetime
 # 1. PALETA Y TEMA PLOTLY
 # ══════════════════════════════════════════════════════════════════
 C = {
-    "bg":      "#080c10",
-    "surface": "#0d1420",
-    "surf2":   "#111927",
-    "border":  "#1e2d42",
-    "accent":  "#00d4aa",
-    "blue":    "#0087ff",
-    "gold":    "#f0b429",
-    "red":     "#ff4d6a",
-    "purple":  "#9b6dff",
-    "text":    "#e8edf5",
-    "muted":   "#5a6b80",
-    "dim":     "#8899aa",
+    "bg":      "#FFFFFF",   # fondo blanco
+    "surface": "#FFFFFF",   # superficies blancas
+    "surf2":   "#F8F9FA",   # gris muy claro para cards
+    "border":  "#DEE2E6",   # borde gris claro
+    "accent":  "#198754",   # verde oscuro (subida)
+    "blue":    "#0D6EFD",   # azul texto/botones
+    "gold":    "#FFC107",   # amarillo advertencia
+    "red":     "#DC3545",   # rojo bajada
+    "purple":  "#6F42C1",   # púrpura (opcional)
+    "text":    "#212529",   # negro texto principal
+    "muted":   "#6C757D",   # gris texto secundario
+    "dim":     "#ADB5BD",   # gris claro texto terciario
 }
 
 PLOTLY_BASE = dict(
-    paper_bgcolor=C["surface"], plot_bgcolor=C["surface"],
-    font=dict(family="DM Sans, sans-serif", color=C["text"], size=12),
-    xaxis=dict(gridcolor=C["border"], zeroline=False, linecolor=C["border"],
-               tickfont=dict(color=C["muted"], size=11)),
-    yaxis=dict(gridcolor=C["border"], zeroline=False, linecolor=C["border"],
-               tickfont=dict(color=C["muted"], size=11)),
-    legend=dict(bgcolor="rgba(0,0,0,0)", bordercolor=C["border"],
-                font=dict(color=C["dim"], size=11)),
+    paper_bgcolor="#FFFFFF",
+    plot_bgcolor="#FFFFFF",
+    font=dict(family="DM Sans, sans-serif", color="#212529", size=12),
+    xaxis=dict(
+        gridcolor="#DEE2E6", zeroline=False, linecolor="#DEE2E6",
+        tickfont=dict(color="#6C757D", size=11),
+    ),
+    yaxis=dict(
+        gridcolor="#DEE2E6", zeroline=False, linecolor="#DEE2E6",
+        tickfont=dict(color="#6C757D", size=11),
+    ),
+    legend=dict(
+        bgcolor="rgba(255,255,255,0.9)",
+        bordercolor="#DEE2E6",
+        font=dict(color="#212529", size=11),
+    ),
     margin=dict(l=50, r=20, t=44, b=44),
     hovermode="x unified",
 )
@@ -50,12 +58,12 @@ def theme(fig: go.Figure) -> go.Figure:
 # 2. EMPRESAS (según documento especificación)
 # ══════════════════════════════════════════════════════════════════
 EMPRESAS = {
-    "FSM":      {"nombre": "Fortuna Silver Mines",          "pais": "Canadá / Perú",    "sector": "Plata",   "color": C["accent"]},
-    "VOLCABC1": {"nombre": "Volcan Compañía Minera S.A.A.", "pais": "Perú",              "sector": "Zinc",    "color": C["blue"]},
-    "BVN":      {"nombre": "Cía. de Minas Buenaventura",   "pais": "Perú",              "sector": "Oro",     "color": C["gold"]},
-    "ABX":      {"nombre": "Barrick Gold Corporation",      "pais": "Canadá / Perú",    "sector": "Oro",     "color": C["purple"]},
-    "BHP":      {"nombre": "BHP Billiton Limited",          "pais": "Australia / Perú", "sector": "Diversif","color": C["red"]},
-    "SCCO":     {"nombre": "Southern Copper Corporation",   "pais": "USA / Perú",       "sector": "Cobre",   "color": C["dim"]},
+    "FSM":      {"nombre": "Fortuna Silver Mines",          "pais": "Canadá / Perú",    "sector": "Plata",    "color": "#198754"},  # verde
+    "VOLCABC1": {"nombre": "Volcan Compañía Minera S.A.A.", "pais": "Perú",              "sector": "Zinc",     "color": "#0D6EFD"},  # azul
+    "BVN":      {"nombre": "Cía. de Minas Buenaventura",   "pais": "Perú",              "sector": "Oro",      "color": "#B8860B"},  # dorado oscuro
+    "ABX":      {"nombre": "Barrick Gold Corporation",      "pais": "Canadá / Perú",    "sector": "Oro",      "color": "#6F42C1"},  # púrpura
+    "BHP":      {"nombre": "BHP Billiton Limited",          "pais": "Australia / Perú", "sector": "Diversif", "color": "#DC3545"},  # rojo
+    "SCCO":     {"nombre": "Southern Copper Corporation",   "pais": "USA / Perú",       "sector": "Cobre",    "color": "#6C757D"},  # gris
 }
 
 # ══════════════════════════════════════════════════════════════════

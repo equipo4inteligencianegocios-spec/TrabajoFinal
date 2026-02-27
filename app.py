@@ -13,27 +13,104 @@ st.set_page_config(
 )
 
 st.markdown("""
-<style>
+<style> */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-.stApp { background-color: #080c10; }
-section[data-testid="stSidebar"] { background-color: #0d1420; border-right: 1px solid #1e2d42; }
-html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; color: #e8edf5; }
+
+/* ── Fondos blancos ─────────────────────────────────── */
+.stApp                          { background-color: #FFFFFF; }
+section[data-testid="stSidebar"]{ background-color: #F8F9FA;
+                                   border-right: 1px solid #DEE2E6; }
+
+/* ── Tipografía ──────────────────────────────────────── */
+html, body, [class*="css"]      { font-family: 'DM Sans', sans-serif;
+                                   color: #212529; }
+
+/* ── Ocultar navegación automática ──────────────────── */
+[data-testid="stSidebarNav"]    { display: none; }
+
+/* ── Métricas ────────────────────────────────────────── */
 [data-testid="metric-container"] {
-    background:#0d1420; border:1px solid #1e2d42; border-radius:10px; padding:14px 18px;
+    background: #FFFFFF;
+    border: 1px solid #DEE2E6;
+    border-radius: 10px;
+    padding: 14px 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
-[data-testid="metric-container"] label { color:#5a6b80 !important; font-size:12px !important; }
+[data-testid="metric-container"] label {
+    color: #6C757D !important;
+    font-size: 12px !important;
+}
 [data-testid="metric-container"] [data-testid="stMetricValue"] {
-    color:#00d4aa; font-family:'JetBrains Mono',monospace;
+    color: #212529;
+    font-family: 'JetBrains Mono', monospace;
 }
-.stTabs [data-baseweb="tab-list"] { background:#0d1420; border-bottom:1px solid #1e2d42; }
-.stTabs [data-baseweb="tab"]      { background:transparent; color:#8899aa; }
-.stTabs [aria-selected="true"]    { background:rgba(0,212,170,0.1)!important; color:#00d4aa!important; }
-.stSelectbox>div>div, .stMultiSelect>div>div { background:#111927; border:1px solid #1e2d42; }
-.stButton>button { background:linear-gradient(135deg,#00d4aa,#00b891);
-    color:#041a14; font-weight:700; border:none; border-radius:7px; }
-.stButton>button:hover { opacity:.88; }
-hr { border-color:#1e2d42; }
-.stDataFrame { border:1px solid #1e2d42; border-radius:8px; }
+
+/* ── Tabs ─────────────────────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] {
+    background: #FFFFFF;
+    border-bottom: 2px solid #DEE2E6;
+}
+.stTabs [data-baseweb="tab"] {
+    background: transparent;
+    color: #6C757D;
+}
+.stTabs [aria-selected="true"] {
+    background: rgba(13,110,253,0.06) !important;
+    color: #0D6EFD !important;
+    border-bottom: 2px solid #0D6EFD !important;
+}
+
+/* ── Inputs y selectbox ──────────────────────────────── */
+.stSelectbox > div > div,
+.stMultiSelect > div > div {
+    background: #FFFFFF;
+    border: 1px solid #DEE2E6;
+    color: #212529;
+}
+
+/* ── Botones: fondo blanco con borde delineado ───────── */
+.stButton > button {
+    background: #FFFFFF;
+    color: #0D6EFD;
+    font-weight: 600;
+    border: 2px solid #0D6EFD;
+    border-radius: 7px;
+    padding: 8px 20px;
+}
+.stButton > button:hover {
+    background: #0D6EFD;
+    color: #FFFFFF;
+}
+
+/* ── Botón de acción principal (confirmar/enviar) ────── */
+.stButton > button[kind="primary"] {
+    background: #FFFFFF;
+    color: #198754;
+    border: 2px solid #198754;
+}
+.stButton > button[kind="primary"]:hover {
+    background: #198754;
+    color: #FFFFFF;
+}
+
+/* ── Alertas con colores claros/semitransparentes ─────── */
+.stAlert {
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+div[data-baseweb="notification"] {
+    background: rgba(220,53,69,0.08) !important;  /* rojo claro */
+    border-color: #DC3545 !important;
+}
+
+/* ── Divisores y bordes ──────────────────────────────── */
+hr { border-color: #DEE2E6; }
+.stDataFrame { border: 1px solid #DEE2E6; border-radius: 8px; }
+
+/* ── Sidebar texto ───────────────────────────────────── */
+section[data-testid="stSidebar"] * { color: #212529; }
+section[data-testid="stSidebar"] .stRadio label { color: #212529 !important; } */
+            [data-testid="stSidebarNav"] { display: none; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -43,13 +120,15 @@ from utils.data import EMPRESAS, C
 with st.sidebar:
     st.markdown("""
     <div style="display:flex;align-items:center;gap:12px;padding:8px 0 18px">
-      <div style="width:40px;height:40px;background:linear-gradient(135deg,#00d4aa,#0087ff);
-                  border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px">⛏</div>
+      <div style="width:40px;height:40px;
+                  background:linear-gradient(135deg,#0D6EFD,#198754);
+                  border-radius:9px;display:flex;align-items:center;
+                  justify-content:center;font-size:20px">⛏</div>
       <div>
-        <div style="font-size:17px;font-weight:700;font-family:Georgia,serif">InvestAI</div>
-        <div style="font-size:9px;color:#5a6b80;letter-spacing:1.5px;text-transform:uppercase">
-            Mineras · Perú · v2.0
-        </div>
+        <div style="font-size:17px;font-weight:700;font-family:Georgia,serif;
+                    color:#212529">InvestAI</div>
+        <div style="font-size:9px;color:#6C757D;letter-spacing:1.5px;
+                    text-transform:uppercase">Mineras · Perú · v2.0</div>
       </div>
     </div>
     """, unsafe_allow_html=True)
@@ -66,11 +145,16 @@ with st.sidebar:
     )
     emp = EMPRESAS[ticker]
     st.markdown(f"""
-    <div style="padding:10px 12px;background:#111927;border:1px solid #1e2d42;
-                border-left:3px solid {emp['color']};border-radius:8px;margin-bottom:18px">
+    <div style="padding:10px 12px;background:#FFFFFF;
+                border:1px solid #DEE2E6;
+                border-left:3px solid {emp['color']};
+                border-radius:8px;margin-bottom:18px;
+                box-shadow:0 1px 3px rgba(0,0,0,0.06)">
         <div style="font-size:13px;font-weight:600;color:{emp['color']}">{ticker}</div>
-        <div style="font-size:11px;color:#8899aa">{emp['nombre']}</div>
-        <div style="font-size:10px;color:#5a6b80;margin-top:2px">{emp['pais']} · Minería {emp['sector']}</div>
+        <div style="font-size:11px;color:#212529">{emp['nombre']}</div>
+        <div style="font-size:10px;color:#6C757D;margin-top:2px">
+            {emp['pais']} · Minería {emp['sector']}
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -89,10 +173,12 @@ with st.sidebar:
 
     st.divider()
     st.markdown("""
-    <div style="font-size:11px;color:#5a6b80;line-height:2">
-        <b style="color:#8899aa">Componente 1 · Fuentes de datos</b><br>
-        📉 Yahoo Finance API &nbsp;<span style="color:#00d4aa">●</span><br>
-        🏦 Interactive Brokers &nbsp;<span style="color:#f0b429">●</span>
+    <div style="font-size:11px;color:#6C757D;line-height:2">
+        <b style="color:#212529">Componente 1 · Fuentes de datos</b><br>
+        📉 Yahoo Finance API &nbsp;
+        <span style="color:#198754;font-weight:700">● Activo</span><br>
+        🏦 Interactive Brokers &nbsp;
+        <span style="color:#FFC107;font-weight:700">● Standby</span>
     </div>
     """, unsafe_allow_html=True)
 

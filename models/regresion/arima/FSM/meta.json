@@ -1,0 +1,19 @@
+{
+  "ticker": "FSM",
+  "yahoo_ticker": "FSM",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "target": "Close (precio)",
+  "best_order": [
+    3,
+    1,
+    2
+  ],
+  "best_aic_train": -1082.661153430416,
+  "metrics_test": {
+    "mae": 1.9090476374042826,
+    "rmse": 2.71650458796313,
+    "mape_pct": 23.3885000296735
+  },
+  "notes": "ARIMA entrenado offline. En la app se carga model.pkl y se usa forecast(steps=1)."
+}

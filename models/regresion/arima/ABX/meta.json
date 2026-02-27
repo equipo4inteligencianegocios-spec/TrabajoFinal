@@ -1,0 +1,19 @@
+{
+  "ticker": "ABX",
+  "yahoo_ticker": "ABX.TO",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "target": "Close (precio)",
+  "best_order": [
+    1,
+    1,
+    1
+  ],
+  "best_aic_train": 2269.2887027354473,
+  "metrics_test": {
+    "mae": 11.903328815622732,
+    "rmse": 18.62318166037827,
+    "mape_pct": 25.30748380289492
+  },
+  "notes": "ARIMA entrenado offline. En la app se carga model.pkl y se usa forecast(steps=1)."
+}

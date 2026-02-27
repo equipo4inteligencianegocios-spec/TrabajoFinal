@@ -319,40 +319,153 @@ def predict_clasificacion(ticker: str, model_id: str) -> dict:
 
 def predict_regresion(ticker: str, model_id: str) -> dict:
     import joblib
-    import tensorflow as tf
-    from statsmodels.tsa.arima.model import ARIMA
+    import json
+    import os
 
+    base = os.path.join(os.path.dirname(__file__), "..", "models")
+
+    # ── Rutas según estructura de carpetas ────────────────────────
+    model_file_map = {
+        "arima":      os.path.join(base, "regresion", "arima",      ticker, "model.pkl"),
+        "lstm_r":     os.path.join(base, "regresion", "lstm_r",     ticker, "model.keras"),
+        "arima_lstm": os.path.join(base, "regresion", "arima_lstm", ticker, "model.pkl"),
+    }
+    meta_file_map = {
+        "arima":      os.path.join(base, "regresion", "arima",      ticker, "meta.json"),
+        "lstm_r":     os.path.join(base, "regresion", "lstm_r",     ticker, "meta.json"),
+        "arima_lstm": os.path.join(base, "regresion", "arima_lstm", ticker, "meta.json"),
+    }
+    scaler_path = os.path.join(base, "regresion", "lstm_r", ticker, "scaler.joblib")
+
+    model_path = model_file_map.get(model_id, "")
+    meta_path  = meta_file_map.get(model_id, "")
+    mae_map    = {"arima": 0.082, "lstm_r": 0.061, "arima_lstm": 0.048}
+
+    # ── Fallback si no existe el modelo ──────────────────────────
+    if not os.path.exists(model_path):
+        print(f"[AVISO] Modelo regresión no encontrado: {model_path} → simulación")
+        np.random.seed(_seed(ticker, model_id))
+        df_tmp  = get_ohlcv(ticker, 2)
+        p_hoy   = float(df_tmp["Close"].iloc[-1])
+        var_pct = float(np.random.normal(0.004, 0.019))
+        p_pred  = p_hoy * (1 + var_pct)
+        tend    = "SUBIDA" if p_pred > p_hoy else "BAJADA"
+        return {
+            "tipo":          "regresion",
+            "tendencia":     tend,
+            "precio_hoy":    round(p_hoy, 4),
+            "precio_pred":   round(p_pred, 4),
+            "variacion_pct": round(var_pct * 100, 2),
+            "confianza":     round(min(abs(var_pct / 0.019) * 45 + 55, 97), 1),
+            "mae":           mae_map.get(model_id, 0.07),
+        }
+
+    # ── Leer meta.json para features y métricas ───────────────────
+    if os.path.exists(meta_path):
+        with open(meta_path) as f:
+            meta = json.load(f)
+        mae = meta.get("mae_test", meta.get("mae", mae_map.get(model_id, 0.07)))
+    else:
+        mae = mae_map.get(model_id, 0.07)
+
+    # ── Datos base ────────────────────────────────────────────────
     df    = get_ohlcv(ticker, 120)
     df    = add_indicators(df)
     df    = df.dropna()
     p_hoy = float(df["Close"].iloc[-1])
 
-    mae_map = {"arima": 0.082, "lstm_r": 0.061, "arima_lstm": 0.048}
-
+    # ── ARIMA (2.2.1) ─────────────────────────────────────────────
     if model_id == "arima":
-        # ARIMA no requiere scaler, trabaja directamente con la serie
-        serie  = df["Close"].values
-        model  = ARIMA(serie, order=(5, 1, 0))  # orden según tu notebook
-        result = model.fit()
-        p_pred = float(result.forecast(steps=1)[0])
+        model  = joblib.load(model_path)
+        p_pred = float(model.forecast(steps=1).iloc[0])
 
+    # ── LSTM Regressor (2.2.2) ────────────────────────────────────
     elif model_id == "lstm_r":
-        lookback = 60
-        feature_cols = ["Close", "RSI", "MACD", "MA20", "MA50"]
-        scaler_X = joblib.load(f"models/scaler_X_{ticker}.pkl")
-        scaler_y = joblib.load(f"models/scaler_y_{ticker}.pkl")
-        model    = tf.keras.models.load_model(f"models/lstm_r_{ticker}.h5")
-        X = df[feature_cols].values
-        X_scaled = scaler_X.transform(X)
-        X_seq    = X_scaled[-lookback:].reshape(1, lookback, len(feature_cols))
-        y_pred_scaled = model.predict(X_seq, verbose=0)
-        p_pred   = float(scaler_y.inverse_transform(y_pred_scaled)[0][0])
+        import tensorflow as tf
 
+        model  = tf.keras.models.load_model(model_path)
+        scaler = joblib.load(scaler_path)
+
+        # Preparar secuencia temporal
+        feature_cols = ["Open", "High", "Low", "Close", "Volume",
+                        "MA20", "MA50", "RSI", "MACD", "MACD_signal",
+                        "MACD_hist", "BB_mid", "BB_upper", "BB_lower"]
+
+        # Usar solo las features que existen en el meta.json si está disponible
+        if os.path.exists(meta_path):
+            with open(meta_path) as f:
+                meta = json.load(f)
+            if "features" in meta:
+                feature_cols = meta["features"]
+
+        input_shape = model.input_shape  # (None, lookback, n_features)
+        lookback    = input_shape[1]
+        X        = df[feature_cols].values
+        X_scaled = scaler.transform(X)
+        X_seq    = X_scaled[-lookback:].reshape(1, lookback, len(feature_cols))
+
+        y_pred   = model.predict(X_seq, verbose=0)
+
+        # Inverse transform: el scaler fue entrenado sobre Close
+        # Reconstruir un array del mismo shape que el scaler espera
+        dummy        = np.zeros((1, len(feature_cols)))
+        close_idx    = feature_cols.index("Close")
+        dummy[0, close_idx] = y_pred[0][0]
+        p_pred = float(scaler.inverse_transform(dummy)[0, close_idx])
+
+    # ── ARIMA-LSTM Ensamble (2.2.3) ───────────────────────────────
     elif model_id == "arima_lstm":
-        # Ensamble: promedio ponderado ARIMA + LSTM
-        pred_arima = ...   # mismo bloque ARIMA de arriba
-        pred_lstm  = ...   # mismo bloque LSTM de arriba
-        p_pred = 0.4 * pred_arima + 0.6 * pred_lstm   # pesos del ensamble
+        # El model.pkl del ensamble puede ser:
+        # a) Un objeto con forecast() → ARIMA fitted
+        # b) Un dict con pesos y referencias
+        # c) Un objeto custom
+        # Intentamos como ARIMA primero, luego como dict
+        try:
+            model  = joblib.load(model_path)
+
+            # Caso a: tiene método forecast → es ARIMA o similar
+            if hasattr(model, "forecast"):
+                p_pred = float(model.forecast(steps=1).iloc[0])
+
+            # Caso b: es un dict con pesos del ensamble
+            elif isinstance(model, dict):
+                peso_arima = model.get("peso_arima", 0.4)
+                peso_lstm  = model.get("peso_lstm",  0.6)
+                # Cargar ARIMA
+                arima_path = os.path.join(base, "regresion", "arima", ticker, "model.pkl")
+                arima_m    = joblib.load(arima_path)
+                pred_arima = float(arima_m.forecast(steps=1).iloc[0])
+                # Cargar LSTM
+                import tensorflow as tf
+                lstm_path  = os.path.join(base, "regresion", "lstm_r", ticker, "model.keras")
+                lstm_m     = tf.keras.models.load_model(lstm_path)
+                scaler     = joblib.load(scaler_path)
+                feature_cols = ["Open", "High", "Low", "Close", "Volume",
+                                "MA20", "MA50", "RSI", "MACD", "MACD_signal",
+                                "MACD_hist", "BB_mid", "BB_upper", "BB_lower"]
+                lookback   = 60
+                X          = df[feature_cols].values
+                X_scaled   = scaler.transform(X)
+                X_seq      = X_scaled[-lookback:].reshape(1, lookback, len(feature_cols))
+                y_pred     = lstm_m.predict(X_seq, verbose=0)
+                dummy      = np.zeros((1, len(feature_cols)))
+                close_idx  = feature_cols.index("Close")
+                dummy[0, close_idx] = y_pred[0][0]
+                pred_lstm  = float(scaler.inverse_transform(dummy)[0, close_idx])
+                p_pred     = peso_arima * pred_arima + peso_lstm * pred_lstm
+
+            # Caso c: tipo desconocido → fallback simulado
+            else:
+                print(f"[AVISO] arima_lstm tipo desconocido: {type(model)} → simulación")
+                np.random.seed(_seed(ticker, model_id))
+                var_pct = float(np.random.normal(0.004, 0.019))
+                p_pred  = p_hoy * (1 + var_pct)
+
+        except Exception as e:
+            print(f"[AVISO] Error cargando arima_lstm: {e} → simulación")
+            np.random.seed(_seed(ticker, model_id))
+            var_pct = float(np.random.normal(0.004, 0.019))
+            p_pred  = p_hoy * (1 + var_pct)
 
     var_pct = (p_pred / p_hoy - 1) * 100
     tend    = "SUBIDA" if p_pred > p_hoy else "BAJADA"
@@ -364,7 +477,7 @@ def predict_regresion(ticker: str, model_id: str) -> dict:
         "precio_pred":   round(p_pred, 4),
         "variacion_pct": round(var_pct, 2),
         "confianza":     round(min(abs(var_pct / 2) * 10 + 55, 97), 1),
-        "mae":           mae_map.get(model_id, 0.07),
+        "mae":           round(mae, 4),
     }
 
 def get_all_predictions(ticker: str) -> dict:

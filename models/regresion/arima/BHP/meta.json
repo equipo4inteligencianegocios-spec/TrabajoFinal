@@ -1,0 +1,19 @@
+{
+  "ticker": "BHP",
+  "yahoo_ticker": "BHP",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "target": "Close (precio)",
+  "best_order": [
+    2,
+    1,
+    2
+  ],
+  "best_aic_train": 4024.715325478132,
+  "metrics_test": {
+    "mae": 5.175116839431768,
+    "rmse": 6.70017727734601,
+    "mape_pct": 9.553388362430093
+  },
+  "notes": "ARIMA entrenado offline. En la app se carga model.pkl y se usa forecast(steps=1)."
+}

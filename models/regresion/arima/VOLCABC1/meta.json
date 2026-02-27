@@ -1,0 +1,19 @@
+{
+  "ticker": "VOLCABC1",
+  "yahoo_ticker": "VOLCABC1.LM",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "target": "Close (precio)",
+  "best_order": [
+    3,
+    1,
+    0
+  ],
+  "best_aic_train": -8331.054651314947,
+  "metrics_test": {
+    "mae": 0.13442354808245618,
+    "rmse": 0.24081080001072067,
+    "mape_pct": 25.217982590982214
+  },
+  "notes": "ARIMA entrenado offline. En la app se carga model.pkl y se usa forecast(steps=1)."
+}

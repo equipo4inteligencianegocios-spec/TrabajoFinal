@@ -1,0 +1,35 @@
+{
+  "ticker": "ABX",
+  "yahoo_ticker": "ABX.TO",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "window": 30,
+  "features": [
+    "Open",
+    "High",
+    "Low",
+    "Close",
+    "Volume",
+    "MA20",
+    "MA50",
+    "RSI",
+    "MACD",
+    "MACD_signal",
+    "MACD_hist",
+    "BB_mid",
+    "BB_upper",
+    "BB_lower"
+  ],
+  "arima_order": [
+    2,
+    0,
+    1
+  ],
+  "alpha": 0.0,
+  "metrics_test": {
+    "mae": 8.259255893810375,
+    "rmse": 14.636558108325817,
+    "mape_pct": 15.294201011745018
+  },
+  "notes": "ARIMA-LSTM ensemble: pred = alpha*ARIMA + (1-alpha)*LSTM. Guardado como bundle en model.pkl."
+}

@@ -1,0 +1,33 @@
+{
+  "ticker": "VOLCABC1",
+  "yahoo_ticker": "VOLCABC1.LM",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "window": 30,
+  "features": [
+    "Open",
+    "High",
+    "Low",
+    "Close",
+    "Volume",
+    "MA20",
+    "MA50",
+    "RSI",
+    "MACD",
+    "MACD_signal",
+    "MACD_hist",
+    "BB_mid",
+    "BB_upper",
+    "BB_lower"
+  ],
+  "epochs_trained": 30,
+  "batch_size": 32,
+  "metrics_test": {
+    "mae": 0.0418635718524456,
+    "rmse": 0.05358139802848216,
+    "mape_pct": 13.52009095584192
+  },
+  "train_seconds": 31.7,
+  "model_format": "h5",
+  "notes": "LSTM Regressor: y(t)=Close(t+1). Indicadores iguales a utils/data.py."
+}

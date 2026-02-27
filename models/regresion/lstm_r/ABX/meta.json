@@ -1,0 +1,33 @@
+{
+  "ticker": "ABX",
+  "yahoo_ticker": "ABX.TO",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "window": 30,
+  "features": [
+    "Open",
+    "High",
+    "Low",
+    "Close",
+    "Volume",
+    "MA20",
+    "MA50",
+    "RSI",
+    "MACD",
+    "MACD_signal",
+    "MACD_hist",
+    "BB_mid",
+    "BB_upper",
+    "BB_lower"
+  ],
+  "epochs_trained": 17,
+  "batch_size": 32,
+  "metrics_test": {
+    "mae": 8.532575607299805,
+    "rmse": 14.991491829384687,
+    "mape_pct": 15.88101145168214
+  },
+  "train_seconds": 22.1,
+  "model_format": "h5",
+  "notes": "LSTM Regressor: y(t)=Close(t+1). Indicadores iguales a utils/data.py."
+}

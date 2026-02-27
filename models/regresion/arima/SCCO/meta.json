@@ -1,0 +1,19 @@
+{
+  "ticker": "SCCO",
+  "yahoo_ticker": "SCCO",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "target": "Close (precio)",
+  "best_order": [
+    1,
+    1,
+    1
+  ],
+  "best_aic_train": 5145.95542013828,
+  "metrics_test": {
+    "mae": 21.13575118256418,
+    "rmse": 30.568190349529463,
+    "mape_pct": 17.472246343148754
+  },
+  "notes": "ARIMA entrenado offline. En la app se carga model.pkl y se usa forecast(steps=1)."
+}

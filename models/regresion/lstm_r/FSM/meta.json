@@ -1,0 +1,33 @@
+{
+  "ticker": "FSM",
+  "yahoo_ticker": "FSM",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "window": 30,
+  "features": [
+    "Open",
+    "High",
+    "Low",
+    "Close",
+    "Volume",
+    "MA20",
+    "MA50",
+    "RSI",
+    "MACD",
+    "MACD_signal",
+    "MACD_hist",
+    "BB_mid",
+    "BB_upper",
+    "BB_lower"
+  ],
+  "epochs_trained": 9,
+  "batch_size": 32,
+  "metrics_test": {
+    "mae": 1.1992003917694092,
+    "rmse": 1.6633025390638645,
+    "mape_pct": 15.40037443942907
+  },
+  "train_seconds": 20.5,
+  "model_format": "h5",
+  "notes": "LSTM Regressor: y(t)=Close(t+1). Indicadores iguales a utils/data.py."
+}

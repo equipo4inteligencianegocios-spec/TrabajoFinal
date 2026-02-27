@@ -1,0 +1,33 @@
+{
+  "ticker": "BHP",
+  "yahoo_ticker": "BHP",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "window": 30,
+  "features": [
+    "Open",
+    "High",
+    "Low",
+    "Close",
+    "Volume",
+    "MA20",
+    "MA50",
+    "RSI",
+    "MACD",
+    "MACD_signal",
+    "MACD_hist",
+    "BB_mid",
+    "BB_upper",
+    "BB_lower"
+  ],
+  "epochs_trained": 30,
+  "batch_size": 32,
+  "metrics_test": {
+    "mae": 2.6007046699523926,
+    "rmse": 4.9371258557685405,
+    "mape_pct": 4.223158482345108
+  },
+  "train_seconds": 33.1,
+  "model_format": "h5",
+  "notes": "LSTM Regressor: y(t)=Close(t+1). Indicadores iguales a utils/data.py."
+}

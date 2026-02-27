@@ -1,0 +1,35 @@
+{
+  "ticker": "SCCO",
+  "yahoo_ticker": "SCCO",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "window": 30,
+  "features": [
+    "Open",
+    "High",
+    "Low",
+    "Close",
+    "Volume",
+    "MA20",
+    "MA50",
+    "RSI",
+    "MACD",
+    "MACD_signal",
+    "MACD_hist",
+    "BB_mid",
+    "BB_upper",
+    "BB_lower"
+  ],
+  "arima_order": [
+    0,
+    1,
+    2
+  ],
+  "alpha": 1.0,
+  "metrics_test": {
+    "mae": 20.824116318082396,
+    "rmse": 34.599677287418515,
+    "mape_pct": 15.197697860149962
+  },
+  "notes": "ARIMA-LSTM ensemble: pred = alpha*ARIMA + (1-alpha)*LSTM. Guardado como bundle en model.pkl."
+}

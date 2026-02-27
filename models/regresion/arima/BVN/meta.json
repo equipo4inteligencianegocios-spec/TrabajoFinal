@@ -1,0 +1,19 @@
+{
+  "ticker": "BVN",
+  "yahoo_ticker": "BVN",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "target": "Close (precio)",
+  "best_order": [
+    0,
+    1,
+    0
+  ],
+  "best_aic_train": 659.7609863055218,
+  "metrics_test": {
+    "mae": 5.1753831026030745,
+    "rmse": 7.5186250753187815,
+    "mape_pct": 24.83445628960668
+  },
+  "notes": "ARIMA entrenado offline. En la app se carga model.pkl y se usa forecast(steps=1)."
+}

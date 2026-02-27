@@ -1,0 +1,34 @@
+{
+  "ticker": "ABX",
+  "yahoo_ticker": "ABX.TO",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "n_splits": 3,
+  "scoring": "f1",
+  "n_train": 1597,
+  "n_test": 400,
+  "features": [
+    "Open",
+    "High",
+    "Low",
+    "Close",
+    "Volume",
+    "MA20",
+    "MA50",
+    "RSI",
+    "MACD",
+    "MACD_signal",
+    "MACD_hist",
+    "BB_mid",
+    "BB_upper",
+    "BB_lower"
+  ],
+  "best_params": {
+    "svc__C": 1,
+    "svc__gamma": 0.1,
+    "svc__kernel": "rbf"
+  },
+  "accuracy_test": 0.5025,
+  "f1_test": 0.43304843304843305,
+  "roc_auc_test": 0.542518563726986
+}

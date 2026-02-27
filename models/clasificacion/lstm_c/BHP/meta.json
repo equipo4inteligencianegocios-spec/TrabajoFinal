@@ -1,0 +1,35 @@
+{
+  "model_id": "lstm_c",
+  "ticker": "BHP",
+  "yahoo_ticker": "BHP",
+  "start_date": "2018-01-01",
+  "lookback": 30,
+  "features": [
+    "Open",
+    "High",
+    "Low",
+    "Close",
+    "Volume",
+    "MA20",
+    "MA50",
+    "RSI",
+    "MACD",
+    "MACD_signal",
+    "MACD_hist",
+    "BB_mid",
+    "BB_upper",
+    "BB_lower"
+  ],
+  "splits": {
+    "train_seq": 1410,
+    "val_seq": 131,
+    "test_seq": 371
+  },
+  "metrics_test": {
+    "accuracy": 0.4716981132075472,
+    "f1": 0.5504587155963303,
+    "roc_auc": 0.4559356725146199
+  },
+  "threshold": 0.5,
+  "seed": 2026
+}

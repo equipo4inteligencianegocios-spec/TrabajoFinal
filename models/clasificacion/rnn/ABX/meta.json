@@ -1,0 +1,30 @@
+{
+  "ticker": "ABX",
+  "yahoo_ticker": "ABX.TO",
+  "start_date": "2015-01-01",
+  "split_ratio": 0.8,
+  "lookback": 30,
+  "features": [
+    "Open",
+    "High",
+    "Low",
+    "Close",
+    "Volume",
+    "MA20",
+    "MA50",
+    "RSI",
+    "MACD",
+    "MACD_signal",
+    "MACD_hist",
+    "BB_mid",
+    "BB_upper",
+    "BB_lower"
+  ],
+  "threshold": 0.5,
+  "n_train_seq": 2170,
+  "n_test_seq": 521,
+  "accuracy": 0.4779270633397313,
+  "precision": 0.6470588235294118,
+  "recall": 0.1506849315068493,
+  "f1": 0.24444444444444444
+}

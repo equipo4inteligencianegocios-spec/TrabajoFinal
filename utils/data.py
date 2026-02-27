@@ -227,21 +227,32 @@ def _seed(ticker: str, model_id: str) -> int:
 def predict_clasificacion(ticker: str, model_id: str) -> dict:
     import joblib
     import tensorflow as tf
+    import json
     import os
 
-    base        = os.path.join(os.path.dirname(__file__), "..", "models")
-    scaler_path = os.path.join(base, f"scaler_{ticker}.pkl")
+    base = os.path.join(os.path.dirname(__file__), "..", "models")
+
+    # ── Rutas según estructura de carpetas del ZIP ────────────────
     model_file_map = {
-        "svc":    os.path.join(base, f"svc_{ticker}.pkl"),
-        "rnn":    os.path.join(base, f"rnn_{ticker}.h5"),
-        "lstm_c": os.path.join(base, f"lstm_c_{ticker}.h5"),
-        "bilstm": os.path.join(base, f"bilstm_{ticker}.h5"),
-        "gru":    os.path.join(base, f"gru_{ticker}.h5"),
+        "svc":    os.path.join(base, "clasificacion", "svc",    ticker, "model.pkl"),
+        "rnn":    os.path.join(base, "clasificacion", "rnn",    ticker, "model.h5"),
+        "lstm_c": os.path.join(base, "clasificacion", "lstm_c", ticker, "model.h5"),
+        "bilstm": os.path.join(base, "clasificacion", "bilstm", ticker, "model.h5"),
+        "gru":    os.path.join(base, "clasificacion", "gru",    ticker, "model.h5"),
     }
+    meta_file_map = {
+        "svc":    os.path.join(base, "clasificacion", "svc",    ticker, "meta.json"),
+        "rnn":    os.path.join(base, "clasificacion", "rnn",    ticker, "meta.json"),
+        "lstm_c": os.path.join(base, "clasificacion", "lstm_c", ticker, "meta.json"),
+        "bilstm": os.path.join(base, "clasificacion", "bilstm", ticker, "meta.json"),
+        "gru":    os.path.join(base, "clasificacion", "gru",    ticker, "meta.json"),
+    }
+
     model_path = model_file_map.get(model_id, "")
+    meta_path  = meta_file_map.get(model_id, "")
 
     # ── Fallback si no existe el modelo ──────────────────────────
-    if not os.path.exists(model_path) or not os.path.exists(scaler_path):
+    if not os.path.exists(model_path):
         print(f"[AVISO] Modelo no encontrado: {model_path} → simulación")
         np.random.seed(_seed(ticker, model_id))
         conf    = float(np.random.uniform(0.52, 0.97))
@@ -256,40 +267,43 @@ def predict_clasificacion(ticker: str, model_id: str) -> dict:
             "precio_hoy": round(float(df_tmp["Close"].iloc[-1]), 4),
         }
 
-    # ── Producción ────────────────────────────────────────────────
-    df_multi = build_multiactivo_df(ticker, days=120)
-    df_multi = add_features_multiactivo(df_multi, ticker)
-    p_hoy    = float(df_multi[f"Close_{ticker}"].iloc[-1])
+    # ── Leer features exactas del meta.json ──────────────────────
+    if os.path.exists(meta_path):
+        with open(meta_path) as f:
+            meta = json.load(f)
+        feature_cols = meta["features"]
+        accuracy     = meta.get("accuracy_test", 0.70)
+    else:
+        # Fallback: features estándar si no hay meta.json
+        feature_cols = ["Open", "High", "Low", "Close", "Volume",
+                        "MA20", "MA50", "RSI", "MACD", "MACD_signal",
+                        "MACD_hist", "BB_mid", "BB_upper", "BB_lower"]
+        accuracy = 0.70
 
-    feature_cols = [
-        f"Spread_OC_{ticker}",
-        f"Momentum_5_{ticker}",
-        f"RSI_{ticker}",
-        f"Momentum_10_{ticker}",
-        f"Range_Norm_{ticker}",
-        f"Range_HL_{ticker}",
-        "High_HG=F",
-        "Low_ABX",
-        f"MACD_{ticker}",
-        "Open_FSM",
-        "Trend",
-    ]
+    # ── Preparar datos con add_indicators() estándar ─────────────
+    df    = get_ohlcv(ticker, 120)
+    df    = add_indicators(df)
+    df    = df.dropna()
+    p_hoy = float(df["Close"].iloc[-1])
+    X     = df[feature_cols].values
 
-    X        = df_multi[feature_cols].values
-    scaler   = joblib.load(scaler_path)
-    X_scaled = scaler.transform(X)
-    acc_map  = {"svc": 0.741, "rnn": 0.658, "lstm_c": 0.712,
-                "bilstm": 0.728, "gru": 0.703}
-
+    # ── Producción: SVC Pipeline (scaler ya incluido) ─────────────
     if model_id == "svc":
         model = joblib.load(model_path)
-        pred  = model.predict(X_scaled[-1:])[0]
-        proba = model.predict_proba(X_scaled[-1:])[0]
+        # Pipeline predice directamente, sin scaler externo
+        pred  = model.predict(X[-1:])[0]
+        proba = model.predict_proba(X[-1:])[0]
         conf  = float(proba.max())
         tend  = "SUBIDA" if pred == 1 else "BAJADA"
+
+    # ── Deep Learning: RNN / LSTM / BiLSTM / GRU ─────────────────
     else:
         lookback = 60
         model    = tf.keras.models.load_model(model_path)
+        # Para DL sí necesitamos escalar manualmente
+        from sklearn.preprocessing import MinMaxScaler
+        scaler   = MinMaxScaler()
+        X_scaled = scaler.fit_transform(X)  # ← reemplazar con scaler guardado cuando estén disponibles
         X_seq    = X_scaled[-lookback:].reshape(1, lookback, len(feature_cols))
         proba    = float(model.predict(X_seq, verbose=0)[0][0])
         conf     = proba if proba > 0.5 else 1 - proba
@@ -299,7 +313,7 @@ def predict_clasificacion(ticker: str, model_id: str) -> dict:
         "tipo":       "clasificacion",
         "tendencia":  tend,
         "confianza":  round(conf * 100, 1),
-        "accuracy":   acc_map.get(model_id, 0.70),
+        "accuracy":   accuracy,
         "precio_hoy": round(p_hoy, 4),
     }
 

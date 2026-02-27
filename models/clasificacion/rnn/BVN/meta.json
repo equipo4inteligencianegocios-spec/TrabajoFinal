@@ -1,0 +1,30 @@
+{
+  "ticker": "BVN",
+  "yahoo_ticker": "BVN",
+  "start_date": "2015-01-01",
+  "split_ratio": 0.8,
+  "lookback": 30,
+  "features": [
+    "Open",
+    "High",
+    "Low",
+    "Close",
+    "Volume",
+    "MA20",
+    "MA50",
+    "RSI",
+    "MACD",
+    "MACD_signal",
+    "MACD_hist",
+    "BB_mid",
+    "BB_upper",
+    "BB_lower"
+  ],
+  "threshold": 0.5,
+  "n_train_seq": 2174,
+  "n_test_seq": 522,
+  "accuracy": 0.5402298850574713,
+  "precision": 0.535632183908046,
+  "recall": 0.8597785977859779,
+  "f1": 0.660056657223796
+}

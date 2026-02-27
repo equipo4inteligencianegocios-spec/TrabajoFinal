@@ -1,0 +1,32 @@
+{
+  "ticker": "BVN",
+  "yahoo_ticker": "BVN",
+  "start_date": "2018-01-01",
+  "split_ratio": 0.8,
+  "window": 30,
+  "features": [
+    "Open",
+    "High",
+    "Low",
+    "Close",
+    "Volume",
+    "MA20",
+    "MA50",
+    "RSI",
+    "MACD",
+    "MACD_signal",
+    "MACD_hist",
+    "BB_mid",
+    "BB_upper",
+    "BB_lower"
+  ],
+  "epochs_trained": 7,
+  "batch_size": 32,
+  "metrics_test": {
+    "accuracy": 0.5621621621621622,
+    "f1": 0.6872586872586872,
+    "auc": 0.5618625277161862
+  },
+  "train_seconds": 19.2,
+  "notes": "GRU classifier. Indicadores iguales a utils/data.py. y(t)=1 si Close(t+1)>Close(t)."
+}
